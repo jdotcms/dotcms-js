@@ -16,12 +16,9 @@
 
     workflows.fireArchive(contentJson, workflowOptions);
 
-   // workflows.fireDelete(contentJson, workflowOptions);
-
     const contentJsonOut = {
         "message":"Contentlet deleted"
     }
 
-    response.headers().append('content-type','application/json');
     return response.status(200).json(contentJsonOut);
 })

@@ -25,7 +25,8 @@
         return response.status(404).text(`Contentlet could not be created`);
     }
 
-    const bodyOut = contentOut.get('body').getJson() || contentOut.get('body').toHtml();
+    const blockEditorBody = contentOut.get('body');
+    const bodyOut = blockEditorBody.getJson() || blockEditorBody.toHtml();
 
     let contentJsonOut = {
         "identifier":contentOut.get('identifier'),
@@ -33,6 +34,5 @@
         "body": bodyOut.toString()
     };
 
-    response.headers().append('content-type','application/json');
     return response.status(200).json(contentJsonOut);
 })

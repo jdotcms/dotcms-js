@@ -5,20 +5,58 @@
     const dotlogger = context.dotlogger;
 
     const identifier = request.getParameter('id');
-    const lang = request.getParameter('lang') | languagewebapi.getDefaultLanguage().getId();
+    const lang = request.getParameter('lang') || languagewebapi.getDefaultLanguage().getId();
+
     dotlogger.info("identifier = " + identifier);
     dotlogger.info("lang = " + lang);
 
-    const contentlet = dotcontent.load(identifier);
-    if (null == contentlet) {
-
-        return response.status(404).text(`Contentlet ${identifier} not found`);
+    class NotFoundError extends Error {
+        constructor(message) {
+            super(message);
+            this.name = "ValidationError";
+        }
     }
 
-    let contentJson = {
-        "title": contentlet.get('title'),
-        "body": JSON.parse(contentlet.get('body').getJson().toString())
-    };
+    function mapToJson(contentlet) {
+        const blockEditorBody = contentlet.get('body');
+        const blockEditorJson = blockEditorBody.getJson();
+        return {
+            "identifier": contentlet.get('identifier'),
+            "title": contentlet.get('title'),
+            "body": blockEditorJson?JSON.parse(blockEditorJson.toString()):blockEditorBody.toHtml()
+        }
+    }
 
-    return response.status(200).json(contentJson);
+    function findById (id) {
+
+        const contentlet = dotcontent.load(id);
+        if (null == contentlet) {
+
+            throw new NotFoundError(`Contentlet ${id} not found`);
+        }
+
+        return  mapToJson(contentlet);
+    }
+
+    function findAll () {
+
+        return dotcontent.pull('+contentType:webPageContent',20,'modDate desc')
+            .map((contentlet) => {
+
+               return mapToJson(contentlet)
+            });
+    }
+
+
+    try {
+        const result = identifier ? findById(identifier) : findAll();
+
+        return response.status(200).json(result);
+    } catch (err) {
+
+        if (err instanceof NotFoundError) {
+            return response.status(404).text(`Contentlet ${id} not found`);
+        }
+        return response.status(500).text(`Error on getting contentlet` + err);
+    }
 })
