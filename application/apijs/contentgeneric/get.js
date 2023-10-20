@@ -23,19 +23,31 @@
         return {
             "identifier": contentlet.get('identifier'),
             "title": contentlet.get('title'),
-            "body": blockEditorJson?JSON.parse(blockEditorJson.toString()):blockEditorBody.toHtml()
+            "body": blockEditorJson ? JSON.parse(blockEditorJson.toString()) : blockEditorBody.toHtml()
         }
     }
 
-    function findById (id) {
+    function findById(id) {
 
-        const contentlet = dotcontent.load(id);
-        if (null == contentlet) {
+        const cacheContentlet = dotcache.get(id);
+        if (!cacheContentlet) {
 
-            throw new NotFoundError(`Contentlet ${id} not found`);
+            const contentlet = dotcontent.load(id);
+            if (null == contentlet) {
+
+                throw new NotFoundError(`Contentlet ${id} not found`);
+            }
+
+            const contentletJson = mapToJson(contentlet);
+            dotcache.put (id, contentletJson);
+
+            dotlogger.info("The id = " + id + " has been put on the cache");
+
+            return contentletJson;
         }
 
-        return  mapToJson(contentlet);
+        dotlogger.info("The id = " + id + " has found on the cache");
+        return cacheContentlet;
     }
 
     function findAll () {

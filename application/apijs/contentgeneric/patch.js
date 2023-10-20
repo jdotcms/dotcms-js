@@ -1,4 +1,4 @@
-(function put(context) {
+(function patch(context) {
 
     const request= context.request;
     const response = context.response;
