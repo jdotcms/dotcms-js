@@ -1,6 +1,5 @@
-(async function get(context) {
+(function get(context) {
 
-    let {NotFoundError} = await import('//api-site/application/modules/not-found-error.mjs');
     const request = context.request;
     const response = context.response;
     const dotlogger = context.dotlogger;
@@ -11,6 +10,12 @@
     dotlogger.info("identifier = " + identifier);
     dotlogger.info("lang = " + lang);
 
+    class NotFoundError extends Error {
+        constructor(message) {
+            super(message);
+            this.name = "ValidationError";
+        }
+    }
 
     function mapToJson(contentlet) {
         const blockEditorBody = contentlet.get('body');
@@ -50,7 +55,7 @@
         return dotcontent.pull('+contentType:webPageContent',20,'modDate desc')
             .map((contentlet) => {
 
-               return mapToJson(contentlet)
+                return mapToJson(contentlet)
             });
     }
 
