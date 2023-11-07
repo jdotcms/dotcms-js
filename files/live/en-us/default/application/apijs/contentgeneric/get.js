@@ -27,9 +27,11 @@
         const cacheContentlet = dotcache.get(id);
         if (!cacheContentlet) {
 
-            const contentlet = dotcontent.load(id);
+            const contentlet = dotcontent.find(id);
+            dotlogger.info("The contentlet = " + contentlet);
             if (null == contentlet) {
 
+                dotlogger.info("Throwing NotFoundError");
                 throw new NotFoundError(`Contentlet ${id} not found`);
             }
 
@@ -58,12 +60,17 @@
     try {
         const result = identifier ? findById(identifier) : findAll();
 
-        return response.status(200).json(result);
+        return response.ok().json(result);
+        //return response.status(200).json(result);
     } catch (err) {
 
+        dotlogger.info("Error on getting contentlet" + err);
         if (err instanceof NotFoundError) {
-            return response.status(404).text(`Contentlet ${id} not found`);
+            //return response.status(404).text(`Contentlet ${id} not found`);
+            dotlogger.info("Contentlet not found 404");
+            return response.status(404).text(`Contentlet ${identifier} not found`);
         }
+
         return response.status(500).text(`Error on getting contentlet` + err);
     }
 })
