@@ -15,10 +15,13 @@
     function mapToJson(contentlet) {
         const blockEditorBody = contentlet.get('body');
         const blockEditorJson = blockEditorBody.getJson();
+        const webPageContentType = dotcontent.loadType('webPageContent');
+
         return {
             "identifier": contentlet.get('identifier'),
             "title": contentlet.get('title'),
-            "body": blockEditorJson ? JSON.parse(blockEditorJson.toString()) : blockEditorBody.toHtml()
+            "body": blockEditorJson ? JSON.parse(blockEditorJson.toString()) : blockEditorBody.toHtml(),
+            "fields":webPageContentType.fieldMap()
         }
     }
 
